@@ -101,6 +101,9 @@ lua << EOF
 local cmp = require'cmp'
 
 cmp.setup({
+  completion = {
+      autocomplete = false,
+  },
   snippet = {
     expand = function(args)
       require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
@@ -147,13 +150,17 @@ local on_attach = function(client, bufnr)
 end
 
 -- Configure specific LSP servers
-lspconfig.clangd.setup { -- C / C++
+lspconfig.clangd.setup {
   on_attach = on_attach,
   cmd = {
     "clangd",
     "--background-index",
     "--clang-tidy",
+    "--header-insertion=never", -- Optional: stops clangd from adding includes automatically
   },
+  init_options = {
+    fallbackFlags = { "--std=c++20", "-Wall", "-Wextra", "-Werror" }; -- Critical for correct diagnostics
+  }
 }
 lspconfig.pyright.setup { -- Python
   on_attach = on_attach,
@@ -176,6 +183,7 @@ augroup vimrc
   autocmd BufRead,BufWritePre,FileWritePre * silent! %s/[\r \t]\+$//
 augroup END
 
+
 " ====================
 " KEY MAPPINGS
 " ====================
@@ -196,8 +204,8 @@ autocmd FileType python imap <buffer> <C-h> <esc>:w<CR>:exec '!python3' shellesc
 autocmd FileType c map <buffer> <C-h> :w<CR>:exec '!gcc -Wall -Wextra' shellescape(@%, 1) '-o out && ./out'<CR>
 autocmd FileType c imap <buffer> <C-h> <esc>:w<CR>:exec '!gcc -Wall -Wextra' shellescape(@%, 1) '-o out && ./out'<CR>
 
-autocmd FileType cpp map <buffer> <C-h> :w<CR>:exec '!g++ -Wall -Wextra -std=c++17' shellescape(@%, 1) '-o out && ./out'<CR>
-autocmd FileType cpp imap <buffer> <C-h> <esc>:w<CR>:exec '!g++ -Wall -Wextra -std=c++17' shellescape(@%, 1) '-o out && ./out'<CR>
+autocmd FileType cpp map <buffer> <C-h> :w<CR>:exec '!clang++ --std=c++20 -O3 -fsanitize=address,undefined -Wall -Wextra -Werror' shellescape(@%, 1) '-o /tmp/out && /tmp/out'<CR>
+autocmd FileType cpp imap <buffer> <C-h> <esc>:w<CR>:exec '!clang++ --std=c++20 -O3 -fsanitize=address,undefined -Wall -Wextra -Werror' shellescape(@%, 1) '-o /tmp/out && /tmp/out'<CR>
 
 " Set a color column for Python
 autocmd FileType python set colorcolumn=88
