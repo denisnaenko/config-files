@@ -167,6 +167,16 @@ lspconfig.pyright.setup { -- Python
 EOF
 
 " ====================
+" END OF LINE
+" ====================
+
+augroup vimrc
+  " Automatically delete trailing DOS-returns and whitespace on file open and
+  " write.
+  autocmd BufRead,BufWritePre,FileWritePre * silent! %s/[\r \t]\+$//
+augroup END
+
+" ====================
 " KEY MAPPINGS
 " ====================
 
